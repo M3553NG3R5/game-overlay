@@ -1,3 +1,22 @@
+// Firebase Setup
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
+import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-database.js";
+
+// Your Firebase configuration
+const firebaseConfig = {
+    apiKey: "AIzaSyDm1Qj95CzbgDyndTVKYGM5KqIerEkuD0w",
+    authDomain: "game-overlay-e2d32.firebaseapp.com",
+    databaseURL: "https://game-overlay-e2d32-default-rtdb.firebaseio.com",
+    projectId: "game-overlay-e2d32",
+    storageBucket: "game-overlay-e2d32.firebasestorage.app",
+    messagingSenderId: "583279550725",
+    appId: "1:583279550725:web:e817fdf6cbd1a61813976c"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
 // Game logic variables
 let wins = 0;
 let losses = 0;
@@ -32,6 +51,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize overlay
     updateOverlay();
     updateMatchHistory();
+    loadStatsFromFirebase(); // Load stats from Firebase on start
 });
 
 function getRank(rp) {
@@ -62,6 +82,7 @@ function addMatch(amount, type) {
     if (matchHistory.length >= 10) matchHistory.shift();
     matchHistory.push({ amount, type });
     updateMatchHistory();
+    saveStatsToFirebase(); // Save stats after every match
 }
 
 function updateMatchHistory() {
@@ -90,6 +111,7 @@ function change(delta) {
     points = Math.max(0, points + delta);
     sessionGainLoss += delta;
     updateOverlay();
+    saveStatsToFirebase(); // Save stats after every change
 }
 
 function setRP(rp) {
@@ -97,6 +119,7 @@ function setRP(rp) {
         sessionGainLoss = 0;
         points = rp;
         updateOverlay();
+        saveStatsToFirebase(); // Save new RP to Firebase
     }
 }
 
@@ -109,11 +132,13 @@ function resetStats() {
     matchHistory.length = 0;
     updateOverlay();
     updateMatchHistory();
+    saveStatsToFirebase(); // Save reset state to Firebase
 }
 
 function isLegend() {
     isInLegend = !isInLegend;
     updateOverlay();
+    saveStatsToFirebase(); // Save Legend toggle to Firebase
 }
 
 function updateOverlay() {
@@ -170,7 +195,44 @@ function updateRankStyling(rankText) {
     }
 }
 
-// Expose functions to the global scope
+// Firebase Functions
+function saveStatsToFirebase() {
+    const statsRef = ref(db, 'gameStats/');
+    set(statsRef, {
+        wins,
+        losses,
+        points,
+        isInLegend,
+        sessionGainLoss,
+        matchHistory
+    });
+}
+
+function loadStatsFromFirebase() {
+    const statsRef = ref(db, 'gameStats/');
+    get(statsRef).then((snapshot) => {
+        if (snapshot.exists()) {
+            const stats = snapshot.val();
+            wins = stats.wins || 0;
+            losses = stats.losses || 0;
+            points = stats.points || 0;
+            isInLegend = stats.isInLegend || false;
+            sessionGainLoss = stats.sessionGainLoss || 0;
+            matchHistory.length = 0;
+            if (Array.isArray(stats.matchHistory)) {
+                matchHistory.push(...stats.matchHistory);
+            }
+            updateOverlay();
+            updateMatchHistory();
+        } else {
+            console.log("No data available");
+        }
+    }).catch((error) => {
+        console.error("Error loading stats: ", error);
+    });
+}
+
+// Expose functions to the global scope for external control
 (function(global) {
     global.change = change;
     global.setRP = setRP;
