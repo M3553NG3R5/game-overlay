@@ -1,6 +1,6 @@
 // Firebase Setup
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
-import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-database.js";
+import { getDatabase, ref, set, get, child, onValue } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-database.js";
 
 // Your Firebase configuration
 const firebaseConfig = {
@@ -48,11 +48,42 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Initialize overlay
-    updateOverlay();
-    updateMatchHistory();
-    loadStatsFromFirebase(); // Load stats from Firebase on start
+    // Setup real-time data listener instead of one-time load
+    setupRealtimeListener();
 });
+
+// Setup real-time database listener
+function setupRealtimeListener() {
+    const statsRef = ref(db, 'gameStats/');
+
+    // This will trigger whenever data changes in Firebase
+    onValue(statsRef, (snapshot) => {
+        if (snapshot.exists()) {
+            const stats = snapshot.val();
+            // Update local variables
+            wins = stats.wins || 0;
+            losses = stats.losses || 0;
+            points = stats.points || 0;
+            isInLegend = stats.isInLegend || false;
+            sessionGainLoss = stats.sessionGainLoss || 0;
+
+            // Update match history
+            matchHistory.length = 0;
+            if (Array.isArray(stats.matchHistory)) {
+                matchHistory.push(...stats.matchHistory);
+            }
+
+            // Update UI
+            updateOverlay();
+            updateMatchHistory();
+        } else {
+            console.log("No data available, initializing with defaults");
+            resetStats(); // Initialize with default values if no data exists
+        }
+    }, (error) => {
+        console.error("Error setting up real-time listener: ", error);
+    });
+}
 
 function getRank(rp) {
     // Handle Grandmaster and Legend rank
@@ -81,12 +112,13 @@ function getRank(rp) {
 function addMatch(amount, type) {
     if (matchHistory.length >= 10) matchHistory.shift();
     matchHistory.push({ amount, type });
-    updateMatchHistory();
-    saveStatsToFirebase(); // Save stats after every match
+    saveStatsToFirebase(); // This will trigger updates across all instances
 }
 
 function updateMatchHistory() {
     const container = document.getElementById("match-bubbles");
+    if (!container) return; // Guard against missing element
+
     container.innerHTML = "";
 
     // Display newest matches on the left (reversed)
@@ -110,16 +142,14 @@ function change(delta) {
     }
     points = Math.max(0, points + delta);
     sessionGainLoss += delta;
-    updateOverlay();
-    saveStatsToFirebase(); // Save stats after every change
+    saveStatsToFirebase(); // This will trigger updates across all instances
 }
 
 function setRP(rp) {
     if (!isNaN(rp) && rp >= 0) {
         sessionGainLoss = 0;
         points = rp;
-        updateOverlay();
-        saveStatsToFirebase(); // Save new RP to Firebase
+        saveStatsToFirebase(); // This will trigger updates across all instances
     }
 }
 
@@ -130,27 +160,30 @@ function resetStats() {
     isInLegend = false;
     sessionGainLoss = 0;
     matchHistory.length = 0;
-    updateOverlay();
-    updateMatchHistory();
-    saveStatsToFirebase(); // Save reset state to Firebase
+    saveStatsToFirebase(); // This will trigger updates across all instances
 }
 
 function isLegend() {
     isInLegend = !isInLegend;
-    updateOverlay();
-    saveStatsToFirebase(); // Save Legend toggle to Firebase
+    saveStatsToFirebase(); // This will trigger updates across all instances
 }
 
 function updateOverlay() {
-    document.getElementById("wins").textContent = `Wins: ${wins}`;
-    document.getElementById("losses").textContent = `Losses: ${losses}`;
-
+    const winsElement = document.getElementById("wins");
+    const lossesElement = document.getElementById("losses");
     const rankInfo = document.getElementById("rank-info");
+    const sessionElement = document.getElementById("session-gain-loss");
+
+    // Guard against missing elements
+    if (!winsElement || !lossesElement || !rankInfo || !sessionElement) return;
+
+    winsElement.textContent = `Wins: ${wins}`;
+    lossesElement.textContent = `Losses: ${losses}`;
+
     const rankText = getRank(points);
     rankInfo.textContent = rankText;
 
     // Update the session gain/loss display
-    const sessionElement = document.getElementById("session-gain-loss");
     sessionElement.textContent = `Session: ${sessionGainLoss > 0 ? '+' : ''}${sessionGainLoss} RP`;
 
     // Apply simple color styling based on session gain/loss
@@ -168,6 +201,7 @@ function updateOverlay() {
 
 function updateRankStyling(rankText) {
     const rankInfo = document.getElementById("rank-info");
+    if (!rankInfo) return; // Guard against missing element
 
     // Remove all existing rank classes
     rankInfo.classList.remove(
@@ -205,31 +239,10 @@ function saveStatsToFirebase() {
         isInLegend,
         sessionGainLoss,
         matchHistory
+    }).catch(error => {
+        console.error("Error saving data: ", error);
     });
-}
-
-function loadStatsFromFirebase() {
-    const statsRef = ref(db, 'gameStats/');
-    get(statsRef).then((snapshot) => {
-        if (snapshot.exists()) {
-            const stats = snapshot.val();
-            wins = stats.wins || 0;
-            losses = stats.losses || 0;
-            points = stats.points || 0;
-            isInLegend = stats.isInLegend || false;
-            sessionGainLoss = stats.sessionGainLoss || 0;
-            matchHistory.length = 0;
-            if (Array.isArray(stats.matchHistory)) {
-                matchHistory.push(...stats.matchHistory);
-            }
-            updateOverlay();
-            updateMatchHistory();
-        } else {
-            console.log("No data available");
-        }
-    }).catch((error) => {
-        console.error("Error loading stats: ", error);
-    });
+    // No need to update UI here as the onValue listener will handle that
 }
 
 // Expose functions to the global scope for external control
