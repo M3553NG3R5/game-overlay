@@ -86,9 +86,9 @@ function setupRealtimeListener() {
 }
 
 function getRank(rp) {
-    // Handle Grandmaster and Legend rank
+    // Handle Legend rank
     if (isInLegend) return `Legend ${rp - 4800} RP`;
-    if (rp >= 6400) return `Grandmasters ${rp - 4800} RP`;
+    if (rp >= 4800) return `Grandmasters ${rp - 4800} RP`;
 
     // Calculate which tier and division the RP falls into
     let tierIndex = Math.floor(rp / 800);
