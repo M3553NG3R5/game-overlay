@@ -171,9 +171,11 @@ function updateRankStyling(rankText) {
 }
 
 // Expose functions to the global scope
-window.change = change;
-window.setRP = setRP;
-window.resetStats = resetStats;
-window.isLegend = isLegend;
+(function(global) {
+    global.change = change;
+    global.setRP = setRP;
+    global.resetStats = resetStats;
+    global.isLegend = isLegend;
+})(typeof window !== 'undefined' ? window : global);
 
 console.log("Use change(x), setRP(x), resetStats(), isLegend() from the console. Positive x = win, negative x = loss.");
