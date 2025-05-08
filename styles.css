@@ -1,0 +1,152 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+:root {
+    /* Rank colors */
+    --bronze-color: #cd7f32;
+    --silver-color: #a0a0a0;
+    --gold-color: #d4af37;
+    --platinum-color: #67dce0; /* Updated to turquoise as requested */
+    --diamond-color: #2e5dc9; /* Updated to blue as requested */
+    --masters-color: #ff9934; /* Orange for Masters */
+    --grandmasters-color: #ff4747;
+    --legend-color: #9678d3; /* Purple for Legend */
+
+    /* UI Colors */
+    --bg-overlay: rgba(0, 0, 0, 0.25);
+    --bg-card: rgba(10, 12, 15, 0.55);
+    --text-primary: rgba(255, 255, 255, 0.95);
+    --text-secondary: rgba(255, 255, 255, 0.7);
+    --win-color: #4CAF50;
+    --loss-color: #F44336;
+    --border-color: rgba(255, 255, 255, 0.1);
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    padding: 0;
+    color: var(--text-primary);
+    height: 100vh;
+    overflow: hidden;
+}
+
+#overlay {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    width: auto;
+    max-width: 280px;
+}
+
+#stats {
+    background-color: var(--bg-card);
+    padding: 12px;
+    border-radius: 6px;
+    width: 100%;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+    border: 1px solid var(--border-color);
+}
+
+#rank-info {
+    font-size: 16px;
+    font-weight: 600;
+    padding: 6px 8px;
+    background-color: var(--bg-overlay);
+    border-radius: 4px;
+    margin-bottom: 8px;
+}
+
+#wins-losses {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin: 8px 0;
+}
+
+#wins, #losses {
+    flex: 1;
+    padding: 5px 8px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 500;
+    background-color: var(--bg-overlay);
+}
+
+#wins {
+    color: var(--win-color);
+    border-left: 2px solid var(--win-color);
+}
+
+#losses {
+    color: var(--loss-color);
+    border-left: 2px solid var(--loss-color);
+}
+
+#session-gain-loss {
+    font-size: 13px;
+    font-weight: 500;
+    padding: 5px 8px;
+    background-color: var(--bg-overlay);
+    border-radius: 4px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+#recent-matches {
+    background-color: var(--bg-card);
+    padding: 10px;
+    border-radius: 6px;
+    width: 100%;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+    border: 1px solid var(--border-color);
+}
+
+#recent-matches h4 {
+    margin: 0 0 8px 0;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+#match-bubbles {
+    display: flex;
+    gap: 4px;
+    width: 100%;
+    flex-direction: row;
+    justify-content: flex-start;
+    overflow-x: auto;
+}
+
+.bubble {
+    width: 24px;
+    height: 24px;
+    border-radius: 3px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-weight: 500;
+    font-size: 10px;
+}
+
+.bubble.win {
+    background-color: var(--win-color);
+}
+
+.bubble.loss {
+    background-color: var(--loss-color);
+}
+
+/* Rank color classes */
+.rank-bronze { color: var(--bronze-color); }
+.rank-silver { color: var(--silver-color); }
+.rank-gold { color: var(--gold-color); }
+.rank-platinum { color: var(--platinum-color); }
+.rank-diamond { color: var(--diamond-color); }
+.rank-masters { color: var(--masters-color); }
+.rank-grandmasters { color: var(--grandmasters-color); }
+.rank-legend { color: var(--legend-color); }
