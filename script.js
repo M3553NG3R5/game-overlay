@@ -1,7 +1,13 @@
+// Import Firebase modules
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
-import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-database.js";
+import {
+    getDatabase,
+    ref,
+    set,
+    onValue
+} from "https://www.gstatic.com/firebasejs/11.7.1/firebase-database.js";
 
-// Firebase config
+// Firebase configuration
 const firebaseConfig = {
     apiKey: "AIzaSyDm1Qj95CzbgDyndTVKYGM5KqIerEkuD0w",
     authDomain: "game-overlay-e2d32.firebaseapp.com",
@@ -12,10 +18,17 @@ const firebaseConfig = {
     appId: "1:583279550725:web:e817fdf6cbd1a61813976c"
 };
 
-// Init Firebase
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const overlayRef = ref(db, "overlay");
+// Initialize Firebase app safely
+let app;
+try {
+    app = initializeApp(firebaseConfig);
+} catch (e) {
+    console.warn("Firebase app already initialized.");
+}
+
+// Initialize Database
+const db = getDatabase();
+const overlayRef = ref(db, 'overlayData');
 
 // Game logic variables
 let wins = 0;
@@ -28,7 +41,7 @@ const matchHistory = [];
 const tiers = ["Bronze", "Silver", "Gold", "Platinum", "Diamond", "Masters"];
 const divisions = [4, 3, 2, 1];
 
-// Load state from Firebase
+// Listen for Firebase updates
 onValue(overlayRef, (snapshot) => {
     const data = snapshot.val();
     if (data) {
@@ -38,32 +51,22 @@ onValue(overlayRef, (snapshot) => {
         isInLegend = data.isInLegend || false;
         sessionGainLoss = data.sessionGainLoss || 0;
         matchHistory.length = 0;
-        if (data.matchHistory) matchHistory.push(...data.matchHistory);
+        if (Array.isArray(data.matchHistory)) {
+            matchHistory.push(...data.matchHistory);
+        }
         updateOverlay();
         updateMatchHistory();
     }
 });
 
-// Save current state to Firebase
-function saveState() {
-    set(overlayRef, {
-        wins,
-        losses,
-        points,
-        isInLegend,
-        sessionGainLoss,
-        matchHistory
-    });
-}
-
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function() {
     const winsElement = document.getElementById('wins');
     const lossesElement = document.getElementById('losses');
 
     if (!document.getElementById('wins-losses')) {
         const container = document.createElement('div');
         container.id = 'wins-losses';
+
         if (winsElement && lossesElement) {
             const winsParent = winsElement.parentNode;
             winsParent.insertBefore(container, winsElement);
@@ -104,6 +107,7 @@ function addMatch(amount, type) {
 function updateMatchHistory() {
     const container = document.getElementById("match-bubbles");
     container.innerHTML = "";
+
     for (let i = matchHistory.length - 1; i >= 0; i--) {
         const match = matchHistory[i];
         const bubble = document.createElement("div");
@@ -125,7 +129,6 @@ function change(delta) {
     points = Math.max(0, points + delta);
     sessionGainLoss += delta;
     updateOverlay();
-    saveState();
 }
 
 function setRP(rp) {
@@ -133,7 +136,6 @@ function setRP(rp) {
         sessionGainLoss = 0;
         points = rp;
         updateOverlay();
-        saveState();
     }
 }
 
@@ -146,35 +148,41 @@ function resetStats() {
     matchHistory.length = 0;
     updateOverlay();
     updateMatchHistory();
-    saveState();
 }
 
 function isLegend() {
     isInLegend = !isInLegend;
     updateOverlay();
-    saveState();
 }
 
 function updateOverlay() {
     document.getElementById("wins").textContent = `Wins: ${wins}`;
     document.getElementById("losses").textContent = `Losses: ${losses}`;
 
-    const rankText = getRank(points);
     const rankInfo = document.getElementById("rank-info");
+    const rankText = getRank(points);
     rankInfo.textContent = rankText;
 
     const sessionElement = document.getElementById("session-gain-loss");
     sessionElement.textContent = `Session: ${sessionGainLoss > 0 ? '+' : ''}${sessionGainLoss} RP`;
 
-    if (sessionGainLoss > 0) {
-        sessionElement.style.color = 'var(--win-color)';
-    } else if (sessionGainLoss < 0) {
-        sessionElement.style.color = 'var(--loss-color)';
-    } else {
-        sessionElement.style.color = 'var(--text-primary)';
-    }
+    sessionElement.style.color = sessionGainLoss > 0
+        ? 'var(--win-color)'
+        : sessionGainLoss < 0
+            ? 'var(--loss-color)'
+            : 'var(--text-primary)';
 
     updateRankStyling(rankText);
+
+    // 🔁 Sync state to Firebase
+    set(overlayRef, {
+        wins,
+        losses,
+        points,
+        isInLegend,
+        sessionGainLoss,
+        matchHistory
+    });
 }
 
 function updateRankStyling(rankText) {
@@ -203,8 +211,4 @@ function updateRankStyling(rankText) {
     }
 }
 
-// Make controls available in console
-window.change = change;
-window.setRP = setRP;
-window.resetStats = resetStats;
-window.isLegend = isLegend;
+console.log("Use change(x), setRP(x), resetStats(), isLegend() from the console. Positive x = win, negative x = loss.");
