@@ -110,7 +110,7 @@ function getRank(rp) {
 }
 
 function addMatch(amount, type) {
-    if (matchHistory.length >= 6) matchHistory.shift();
+    if (matchHistory.length >= 7) matchHistory.shift();
     matchHistory.push({ amount, type });
     saveStatsToFirebase(); // This will trigger updates across all instances
 }
