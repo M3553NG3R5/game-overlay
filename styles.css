@@ -5,20 +5,23 @@
     --bronze-color: #cd7f32;
     --silver-color: #a0a0a0;
     --gold-color: #d4af37;
-    --platinum-color: #67dce0; /* Updated to turquoise as requested */
-    --diamond-color: #2e5dc9; /* Updated to blue as requested */
-    --masters-color: #ff9934; /* Orange for Masters */
+    --platinum-color: #67dce0;
+    --diamond-color: #2e5dc9;
+    --masters-color: #ff9934;
     --grandmasters-color: #991eaf;
-    --legend-color: #9678d3; /* Purple for Legend */
+    --legend-color: #9678d3;
 
     /* UI Colors */
-    --bg-overlay: rgba(0, 0, 0, 0.25);
-    --bg-card: rgba(10, 12, 15, 0.55);
-    --text-primary: rgba(255, 255, 255, 0.95);
-    --text-secondary: rgba(255, 255, 255, 0.7);
-    --win-color: #4CAF50;
-    --loss-color: #F44336;
-    --border-color: rgba(255, 255, 255, 0.1);
+    --bg-overlay: rgba(18, 22, 31, 0.80);
+    --bg-card: rgba(24, 28, 40, 0.65);
+    --glass-blur: blur(8px);
+    --text-primary: rgba(255, 255, 255, 0.97);
+    --text-secondary: rgba(200, 210, 230, 0.74);
+    --win-color: #4ade80;
+    --loss-color: #f87171;
+    --border-color: rgba(255, 255, 255, 0.12);
+    --shadow: 0 3px 18px 0 rgba(30,34,45,0.22);
+    --rank-shadow: 0 2px 8px 0 rgba(70,70,120,0.11);
 }
 
 body {
@@ -27,126 +30,183 @@ body {
     padding: 0;
     color: var(--text-primary);
     height: 100vh;
+    background: linear-gradient(135deg, #1a2238 0%, #282e4b 100%);
     overflow: hidden;
 }
 
 #overlay {
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: 28px;
+    right: 32px;
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    gap: 8px;
-    width: auto;
-    max-width: 280px;
+    gap: 18px;
+    width: 100%;
+    max-width: 340px;
+    z-index: 10;
+    backdrop-filter: var(--glass-blur);
 }
 
 #stats {
-    background-color: var(--bg-card);
-    padding: 12px;
-    border-radius: 6px;
+    background: var(--bg-card);
+    padding: 20px 20px 16px 20px;
+    border-radius: 18px;
     width: 100%;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
-    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
+    border: 1.5px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 
 #rank-info {
-    font-size: 16px;
-    font-weight: 600;
-    padding: 6px 8px;
-    background-color: var(--bg-overlay);
-    border-radius: 4px;
-    margin-bottom: 8px;
+    font-size: 1.18rem;
+    font-weight: 700;
+    padding: 7px 16px;
+    border-radius: 10px;
+    margin-bottom: 3px;
+    background: rgba(255,255,255,0.07);
+    letter-spacing: 0.5px;
+    box-shadow: var(--rank-shadow);
+    transition: background 0.2s, color 0.2s;
+    align-self: flex-start;
 }
 
 #wins-losses {
     display: flex;
     justify-content: space-between;
-    gap: 8px;
-    margin: 8px 0;
+    gap: 12px;
+    margin: 10px 0 3px 0;
+    width: 100%;
 }
 
 #wins, #losses {
     flex: 1;
-    padding: 5px 8px;
-    border-radius: 4px;
-    font-size: 13px;
-    font-weight: 500;
-    background-color: var(--bg-overlay);
+    padding: 7px 0;
+    border-radius: 6px;
+    font-size: 1.01rem;
+    font-weight: 600;
+    background: rgba(255,255,255,0.04);
+    text-align: center;
+    letter-spacing: 0.2px;
+    border-left: 3px solid transparent;
+    transition: background 0.2s, border-left 0.2s;
 }
 
 #wins {
     color: var(--win-color);
-    border-left: 2px solid var(--win-color);
+    border-left: 3px solid var(--win-color);
+    background: rgba(74,222,128,0.09);
 }
-
 #losses {
     color: var(--loss-color);
-    border-left: 2px solid var(--loss-color);
+    border-left: 3px solid var(--loss-color);
+    background: rgba(248,113,113,0.07);
 }
 
 #session-gain-loss {
-    font-size: 13px;
-    font-weight: 500;
-    padding: 5px 8px;
-    background-color: var(--bg-overlay);
-    border-radius: 4px;
+    font-size: 1.01rem;
+    font-weight: 600;
+    padding: 6px 0;
+    background: rgba(255,255,255,0.06);
+    border-radius: 5px;
     width: 100%;
     box-sizing: border-box;
+    margin-top: 4px;
+    text-align: center;
+    letter-spacing: 0.1px;
+    transition: color 0.2s;
 }
 
 #recent-matches {
-    background-color: var(--bg-card);
-    padding: 10px;
-    border-radius: 6px;
+    background: var(--bg-card);
+    padding: 15px 14px 13px 14px;
+    border-radius: 16px;
     width: 100%;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
-    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
+    border: 1.5px solid var(--border-color);
 }
 
 #recent-matches h4 {
-    margin: 0 0 8px 0;
-    font-size: 13px;
-    font-weight: 500;
+    margin: 0 0 12px 0;
+    font-size: 1rem;
+    font-weight: 600;
     color: var(--text-secondary);
+    letter-spacing: 0.8px;
 }
 
 #match-bubbles {
     display: flex;
-    gap: 4px;
+    gap: 12px;
     width: 100%;
     flex-direction: row;
     justify-content: flex-start;
+    align-items: center;
     overflow-x: auto;
+    min-height: 36px;
+    margin-top: 2px;
 }
 
 .bubble {
-    width: 24px;
-    height: 24px;
-    border-radius: 3px;
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
     display: flex;
     justify-content: center;
     align-items: center;
     color: white;
-    font-weight: 500;
-    font-size: 10px;
+    font-weight: 700;
+    font-size: 1.08rem;
+    background: rgba(255,255,255,0.06);
+    box-shadow: 0 1.5px 4px 0 rgba(40,40,60,0.12);
+    border: 2.5px solid transparent;
+    transition: background 0.22s, border 0.22s, color 0.22s, transform 0.18s;
+    animation: popIn 0.4s cubic-bezier(0.4,1.6,0.6,1) backwards;
 }
-
+@keyframes popIn {
+    from { transform: scale(0.55); opacity: 0.1; }
+    to   { transform: scale(1);   opacity: 1; }
+}
 .bubble.win {
-    background-color: var(--win-color);
+    border-color: var(--win-color);
+    background: rgba(74,222,128,0.18);
+    color: var(--win-color);
 }
-
 .bubble.loss {
-    background-color: var(--loss-color);
+    border-color: var(--loss-color);
+    background: rgba(248,113,113,0.14);
+    color: var(--loss-color);
 }
 
-/* Rank color classes */
-.rank-bronze { color: var(--bronze-color); }
-.rank-silver { color: var(--silver-color); }
-.rank-gold { color: var(--gold-color); }
-.rank-platinum { color: var(--platinum-color); }
-.rank-diamond { color: var(--diamond-color); }
-.rank-masters { color: var(--masters-color); }
-.rank-grandmasters { color: var(--grandmasters-color); }
-.rank-legend { color: var(--legend-color); }
+/* Rank color backgrounds for extra polish */
+.rank-bronze { background: linear-gradient(90deg, #4c3521 0%, #cd7f32 100%); color: #fffbe0; }
+.rank-silver { background: linear-gradient(90deg, #596166 0%, #b8b8b8 100%); color: #ffffff; }
+.rank-gold { background: linear-gradient(90deg, #8b7d32 0%, #ffe277 100%); color: #fffbe1; }
+.rank-platinum { background: linear-gradient(90deg, #227d7a 0%, #67dce0 100%); color: #e7ffff; }
+.rank-diamond { background: linear-gradient(90deg, #254ca6 0%, #8ecfff 100%); color: #eaf6ff; }
+.rank-masters { background: linear-gradient(90deg, #a15612 0%, #ff9934 100%); color: #fff3e1; }
+.rank-grandmasters { background: linear-gradient(90deg, #a13da1 0%, #ffb6d5 100%); color: #fff5fd; }
+.rank-legend {
+    background: linear-gradient(90deg, #f7cb68 0%, #9678d3 100%);
+    color: #fff;
+    text-shadow: 0 1px 7px #a26822a3;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    #overlay {
+        top: 8px;
+        right: 8px;
+        max-width: 98vw;
+    }
+    #stats, #recent-matches {
+        padding-left: 6vw;
+        padding-right: 6vw;
+    }
+    .bubble {
+        width: 27px;
+        height: 27px;
+        font-size: 0.95rem;
+    }
+}
