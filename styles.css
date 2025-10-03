@@ -30,7 +30,6 @@ body {
     padding: 0;
     color: var(--text-primary);
     height: 100vh;
-    background: linear-gradient(135deg, #1a2238 0%, #282e4b 100%);
     overflow: hidden;
 }
 
